@@ -1,5 +1,6 @@
 import xbmc
 import os
+import time
 
 # Autoexec script to improve buffering, network and performance on Android/Nvidia Shield
 # This script writes an advancedsettings.xml with high-performance caching and network parameters.
@@ -83,4 +84,27 @@ def write_advanced_settings():
     except Exception as e:
         xbmc.log('[autoexec] Failed to write advancedsettings.xml: {}'.format(e), xbmc.LOGERROR)
 
+
+
+def purge_old_thumbnails(days=60):
+    """
+    Delete thumbnail files older than the specified number of days to keep the texture cache lean.
+    """
+    thumbs_path = xbmc.translatePath('special://profile/Thumbnails')
+    if not os.path.isdir(thumbs_path):
+        return
+    now = time.time()
+    cutoff = now - days * 86400
+    for root, dirs, files in os.walk(thumbs_path):
+        for name in files:
+            file_path = os.path.join(root, name)
+            try:
+                if os.path.getmtime(file_path) < cutoff:
+                    os.remove(file_path)
+            except Exception:
+                pass
+    xbmc.log(f'[autoexec] Purged thumbnails older than {days} days', xbmc.LOGNOTICE)
+
+# Execute functions on startup
 write_advanced_settings()
+purge_old_thumbnails()
