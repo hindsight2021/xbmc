@@ -626,6 +626,29 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
   // and add head_pos which wrapped around, e.g. 0x0001 0000 0000 -> 0x0001 0000 0004
   m_headPos = (m_headPos & UINT64_UPPER_BYTES) | (uint64_t)head_pos;
 
+  
+    // Custom stuck detection: monitor if playback head position stops advancing
+    static uint32_t s_lastHeadPos = 0;
+    static unsigned int s_stuckCount = 0;
+    if (head_pos == s_lastHeadPos)
+    {
+      s_stuckCount++;
+    }
+    else
+    {
+      s_lastHeadPos = head_pos;
+      s_stuckCount = 0;
+    }
+    // If stuck for several iterations, reset the AudioTrack to recover
+    if (s_stuckCount > 3 && m_at_jni)
+    {
+      CLog::Log(LOGWARNING, "AESinkAUDIOTRACK: detected stuck playback head position; resetting AudioTrack");
+      m_at_jni->stop();
+      m_at_jni->flush();
+      m_at_jni->play();
+      s_stuckCount = 0;
+    }
+
   double gone = static_cast<double>(m_headPos) / m_sink_sampleRate;
 
   // if sink is run dry without buffer time written anymore
