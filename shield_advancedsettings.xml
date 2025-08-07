@@ -1,0 +1,16 @@
+<advancedsettings>
+  <cache>
+    <buffermode>1</buffermode>                <!-- stream buffers into memory -->
+    <memorysize>268435456</memorysize>        <!-- 256 MB for video/audio buffers -->
+    <readfactor>8.0</readfactor>              <!-- read ahead 8x playback speed -->
+  </cache>
+  <network>
+    <curlclienttimeout>30</curlclienttimeout>
+    <curllowspeedtime>30</curllowspeedtime>
+    <nfschunksize>1048576</nfschunksize>      <!-- 1 MB NFS chunk size -->
+    <smbchunksize>1048576</smbchunksize>      <!-- 1 MB SMB chunk size -->
+  </network>
+  <video>
+    <noofbuffers>3</noofbuffers>              <!-- reduce number of decode buffers -->
+  </video>
+</advancedsettings>
